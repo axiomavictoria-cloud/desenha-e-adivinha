@@ -24,6 +24,37 @@ function playFeedback(kind){
     });
   } catch(e) { /* áudio opcional: o jogo continua mesmo se o navegador bloquear */ }
 }
+function playFinalCelebration(){
+  try {
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return;
+    audioContext ||= new AudioCtx();
+    if(audioContext.state==="suspended") audioContext.resume();
+    const start=audioContext.currentTime+0.08;
+    // Melodia original em tom maior, com clima de festa e encerramento.
+    const melody=[{n:523.25,t:0},{n:659.25,t:.19},{n:783.99,t:.38},{n:1046.5,t:.62},{n:987.77,t:.94},{n:783.99,t:1.18},{n:880,t:1.43},{n:1046.5,t:1.72},{n:1318.51,t:2.08}];
+    melody.forEach(({n,t},i)=>{
+      const osc=audioContext.createOscillator(),gain=audioContext.createGain();
+      osc.type=i===3||i===8?"triangle":"sine";
+      osc.frequency.setValueAtTime(n,start+t);
+      gain.gain.setValueAtTime(.0001,start+t);
+      gain.gain.exponentialRampToValueAtTime(.13,start+t+.025);
+      gain.gain.exponentialRampToValueAtTime(.0001,start+t+.32);
+      osc.connect(gain);gain.connect(audioContext.destination);
+      osc.start(start+t);osc.stop(start+t+.34);
+    });
+    // Acorde final de comemoração.
+    [523.25,659.25,783.99,1046.5].forEach(freq=>{
+      const osc=audioContext.createOscillator(),gain=audioContext.createGain();
+      osc.type="sine";osc.frequency.value=freq;
+      gain.gain.setValueAtTime(.0001,start+2.25);
+      gain.gain.exponentialRampToValueAtTime(.07,start+2.32);
+      gain.gain.exponentialRampToValueAtTime(.0001,start+3.05);
+      osc.connect(gain);gain.connect(audioContext.destination);
+      osc.start(start+2.25);osc.stop(start+3.08);
+    });
+  } catch(e) { /* áudio opcional */ }
+}
 function showGame(c){code=c;$("home").hidden=true;$("game").hidden=false;$("codeLabel").textContent=c}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));$("createPane").hidden=b.dataset.tab!=="create";$("joinPane").hidden=b.dataset.tab!=="join";$("homeError").textContent=""});
 $("createBtn").onclick=()=>{const words=$("words").value.split(/[\n,;]/).map(x=>x.trim()).filter(Boolean);socket.emit("createRoom",{name:$("hostName").value,words},r=>{if(r.error){$("homeError").textContent=r.error;return}me=socket.id;isHost=true;showGame(r.code);toast("Sala criada! Compartilhe o código.")})};
@@ -38,7 +69,7 @@ socket.on("roundStarted",r=>{ctx.clearRect(0,0,canvas.width,canvas.height);$("ch
 socket.on("tick",n=>$("timer").textContent="00:"+String(n).padStart(2,"0"));
 socket.on("roundEnded",r=>{message("Sistema","Tempo esgotado! Palavra: "+r.word,true);$("wordHint").textContent="Próxima rodada em instantes..."});
 socket.on("chatMessage",m=>message(m.name,m.text));socket.on("systemMessage",m=>message("Sistema",m.text,true));
-socket.on("finished",list=>{$("results").hidden=false;$("ranking").innerHTML="";list.forEach((p,i)=>{const d=document.createElement("div");d.className="rank";d.textContent=(i+1)+"º — "+p.name+" — "+p.score+" pontos";$("ranking").append(d)})});
+socket.on("finished",list=>{$("results").hidden=false;playFinalCelebration();$("ranking").innerHTML="";const thanks=document.createElement("p");thanks.className="thanks";thanks.textContent="🎉 Obrigado por jogar com a gente! Foi muito bom ter vocês aqui. Até a próxima partida!";$("ranking").append(thanks);list.forEach((p,i)=>{const d=document.createElement("div");d.className="rank";d.textContent=(i+1)+"º — "+p.name+" — "+p.score+" pontos";$("ranking").append(d)})});
 function pos(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
 function send(type,data){socket.emit("draw",{code,data:{type,...data}})}
 canvas.addEventListener("pointerdown",e=>{if(!canDraw)return;drawing=true;const p=pos(e);canvas.setPointerCapture(e.pointerId);send("begin",{...p,color:eraseMode?"#ffffff":$("color").value,width:eraseMode?28:Number($("width").value)})});
