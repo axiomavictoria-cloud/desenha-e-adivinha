@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Desenha & Adivinha</title><link rel="stylesheet" href="style.css"></head>
-<body><main class="shell"><header><div class="logo">✏️</div><div><h1>Desenha <span>&</span> Adivinha</h1><p>Uma palavra, um desenho e muitos palpites!</p></div></header>
+<body><main class="shell"><header><img class="brand-logo" src="/logo.svg" alt="Logo da marca"><div><h1>Desenha <span>&</span> Adivinha</h1><p>Uma palavra, um desenho e muitos palpites!</p></div></header>
 <section id="home" class="panel"><div class="tabs"><button class="tab active" data-tab="create">Criar sala</button><button class="tab" data-tab="join">Entrar na sala</button></div>
 <div id="createPane"><label>Seu apelido</label><input id="hostName" maxlength="24" placeholder="Ex.: Rafa"><label>Suas palavras <small>(uma por linha; mínimo 9, recomendamos 15)</small></label><textarea id="words" rows="7" placeholder="Abacaxi&#10;Avião&#10;Dinossauro&#10;Praia&#10;..."></textarea><button id="createBtn" class="primary">Criar minha sala</button></div>
 <div id="joinPane" hidden><label>Seu apelido</label><input id="playerName" maxlength="24" placeholder="Ex.: Bia"><label>Código da sala</label><input id="roomCode" maxlength="6" placeholder="ABC123"><button id="joinBtn" class="primary">Entrar e jogar</button></div><p id="homeError" class="error"></p></section>
